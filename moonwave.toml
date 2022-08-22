@@ -5,20 +5,27 @@ gitSourceBranch = "master"
 changelog = true
 classOrder = []
 
+[[classOrder]]
+classes = ["NeoNet"]
+
+[[classOrder]]
+section = "Middleware"
+classes = ["RateLimiter", "TypeChecker"]
+
 [docusaurus]
 onBrokenLinks = "throw"
 onBrokenMarkdownLinks = "warn"
-favicon = "NeoNetLogo.ico"
+favicon = "NeoNetLogo.png"
 
 # From git:
 organizationName = "NeonD00m"
 projectName = "NeoNet"
 url = "https://NeonD00m.github.io"
-baseUrl = "NeoNet/"
+baseUrl = "/NeoNet/"
 tagline = "Simple yet powerful networking library"
 
-[navbar]
-hideableSidebar = true
+# [navbar]
+# hideableSidebar = true
 
 [footer]
 style = "dark"

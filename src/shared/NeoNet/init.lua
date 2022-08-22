@@ -5,16 +5,34 @@
     similar to other networking modules.
 ]=]
 
+--[=[
+    @within NeoNet
+    @type RemoteSetupInfo {RemoteEvents: {string},RemoteFunctions: {string},RemoteValues: {string: any},}
+
+    The information that should be sent into NeoNet:Setup
+]=]
 export type RemoteSetupInfo = {
     RemoteEvents: {string},
     RemoteFunctions: {string},
     RemoteValues: {string: any},
 }
 
+--[=[
+    @within NeoNet
+    @type RemoteClientMiddleware (Parameters: {number: any},) -> (boolean)
+
+    Type for client middleware.
+]=]
 export type RemoteClientMiddleware = (
     Parameters: {number: any}
 ) -> (boolean)
 
+--[=[
+    @within NeoNet
+    @type RemoteServerMiddleware (Player: Player,Parameters: {number: any}) -> (boolean)
+
+    Type for server middleware.
+]=]
 export type RemoteServerMiddleware = (
     Player: Player,
     Parameters: {number: any}
@@ -24,10 +42,17 @@ local RunService = game:GetService("RunService")
 local IsServer = RunService:IsServer()
 local IsRunning = RunService:IsRunning()
 
+local RemoteValues = {}
 local NeoNet = {
     Middleware = script,--so you can do NeoNet.Middleware.TestMiddleware
 }
-local RemoteValues = {}
+
+--[=[
+    @prop Middleware {number: ModuleScript}
+    @within NeoNet
+
+    For access to the built-in middleware that comes with NeoNet such as RateLimiter and TypeChecker.
+]=]
 
 --[[
     CLIENT & SERVER METHODS
