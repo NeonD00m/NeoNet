@@ -1,15 +1,8 @@
-local RunService = game:GetService("RunService")
-local IsServer = RunService:IsServer()
-local IsRunning = RunService:IsRunning()
 --[=[
     NeoNet
     Based off of 'Net' by sleitnick with added features similar to 'Comm'
     Simple yet, provides excellent utility.
 ]=]
-local NeoNet = {
-    Middleware = script:GetChildren(),
-}
-local RemoteValues = {}
 
 export type RemoteSetupInfo = {
     RemoteEvents: {string},
@@ -25,6 +18,15 @@ export type RemoteServerMiddleware = (
     Player: Player,
     Parameters: {number: any}
 ) -> (boolean)
+
+local RunService = game:GetService("RunService")
+local IsServer = RunService:IsServer()
+local IsRunning = RunService:IsRunning()
+
+local NeoNet = {
+    Middleware = script,--so you can do NeoNet.Middleware.TestMiddleware
+}
+local RemoteValues = {}
 
 --[[
     CLIENT & SERVER METHODS
@@ -77,7 +79,10 @@ function NeoNet:RemoteValue(name: string, value: any)
             r.Parent = script
             RemoteValues[name] = {
                 Event = r,
-                Value = value
+                Value = value,
+                _connection = r.OnServerEvent:Connect(function(player)
+                    r:FireClient(player, RemoteValues[name].Value)
+                end)
             }
         end
         return RemoteValues[name]
@@ -86,6 +91,16 @@ function NeoNet:RemoteValue(name: string, value: any)
 		if not r then
 			error("Failed to find RemoteValue: " .. name, 2)
 		end
+        if not RemoteValues[name] then
+            RemoteValues[name] = {
+                Event = r,
+                Value = value,
+                _connection = r.OnClientEvent:Connect(function(newValue)
+                    RemoteValues[name].Value = newValue
+                end)
+            }
+            r:FireServer()--ask server for current value
+        end
 		return RemoteValues[name]
     end
 end
@@ -103,9 +118,9 @@ end
 function NeoNet:Fire(name: string, ...: any)
     if not IsRunning then return end
     if IsServer then
-        self:RemoteEvent(name).Event:FireAllClients(...)
+        self:RemoteEvent(name):FireAllClients(...)
     else
-        self:RemoteEvent(name).Event:FireServer(...)
+        self:RemoteEvent(name):FireServer(...)
     end
 end--add fire for, except, and other things
 
@@ -170,7 +185,7 @@ else
 
     function NeoNet:Observe(name: string, handler: (any))--add middleware
         if not IsRunning then return end
-        local r = self:Remotevalue(name)
+        local r = self:RemoteValue(name)
         handler(r.Value)
         return r.Event.OnClientEvent:Connect(handler)
     end

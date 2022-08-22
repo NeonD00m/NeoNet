@@ -4,9 +4,13 @@ return function(maxRequests: number, isPerSeconds: boolean)--constructor
     end
 
     local lastRequest = 0
-    local intervalTime = 1/maxRequests
+    local intervalTime = 1 / maxRequests
 
     return function()--actual middleware
-        return lastRequest + intervalTime <= os.clock()
+        local result = lastRequest + intervalTime <= os.clock()
+        if result then
+            lastRequest = os.clock()
+        end
+        return result
     end
 end
