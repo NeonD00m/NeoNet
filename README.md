@@ -1,4 +1,4 @@
-<img src="NeoNetLogo.png" align="right"/>
+<img src="NeoNetLogoSmall128.png" align="right"/>
 
 <h1>NeoNet</h1>
 <h3>A networking module made to have simple API with advanced utility.</h3>
