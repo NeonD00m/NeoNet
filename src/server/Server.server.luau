@@ -7,7 +7,7 @@ local RateLimiter = require(NeoNet.Middleware.RateLimiter)
 -- 		"ClickRequest"
 -- 	},
 -- 	RemoteValues = {
--- 		"ButtonClicks"
+-- 		ButtonClicks = 0
 -- 	}
 -- }
 NeoNet:RemoteEvent("ClickRequest")
@@ -15,4 +15,4 @@ NeoNet:RemoteValue("ButtonClicks", 0)
 
 NeoNet:Connect("ClickRequest", function()
 	NeoNet:SetValue("ButtonClicks", NeoNet:GetValue("ButtonClicks") + 1)
-end, RateLimiter(0.5, true))
+end)--, RateLimiter(0.5, true))
