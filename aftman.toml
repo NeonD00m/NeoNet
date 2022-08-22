@@ -1,0 +1,7 @@
+[tools]
+rojo = "rojo-rbx/rojo@7.2.0"
+wally-package-types = "JohnnyMorganz/wally-package-types@1.0.0"
+wally = "UpliftGames/wally@0.3.1"
+stylua = "JohnnyMorganz/stylua@0.14.0"
+selene = "Kampfkarren/selene@0.18.2"
+remodel = "rojo-rbx/remodel@0.10.0"

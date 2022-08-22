@@ -1,0 +1,49 @@
+{
+    "name": "maze test place",
+    "tree": {
+        "$className": "DataModel",
+    
+        "ReplicatedStorage": {
+            "$className": "ReplicatedStorage",
+            "$path": "src/shared",
+            "$ignoreUnknownInstances": true,
+    
+            "Packages": {
+            "$path": "Packages"
+            }
+        },
+        "ServerScriptService": {
+            "$className": "ServerScriptService",
+            "$path": "src/server",
+            "$ignoreUnknownInstances": true,
+            
+            "ServerPackages": {
+            "$path": "ServerPackages"
+            }
+        },
+    
+        "StarterPlayer": {
+            "$className": "StarterPlayer",
+            "StarterCharacterScripts": {
+            "$className": "StarterCharacterScripts",
+            "$ignoreUnknownInstances": true,
+            "$path": "src/StarterPlayer/StarterCharacterScripts"
+            },
+    
+            "StarterPlayerScripts": {
+            "$className": "StarterPlayerScripts",
+            "$ignoreUnknownInstances": true,
+            "$path": "src/client"
+            },
+    
+            "$ignoreUnknownInstances": true
+        },
+    
+        "SoundService": {
+            "$className": "SoundService",
+            "$properties": {
+            "RespectFilteringEnabled": true
+            }
+        }
+    }
+}
