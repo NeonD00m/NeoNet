@@ -15,7 +15,7 @@ classes = ["RateLimiter", "TypeChecker"]
 [docusaurus]
 onBrokenLinks = "throw"
 onBrokenMarkdownLinks = "warn"
-favicon = "NeoNetLogo.png"
+favicon = "favicon.ico"
 
 # From git:
 organizationName = "NeonD00m"
@@ -26,6 +26,10 @@ tagline = "Simple yet powerful networking library"
 
 # [navbar]
 # hideableSidebar = true
+
+# [navbar.logo]
+# alt = "NeoNet"
+# src = "get an svg"
 
 [footer]
 style = "dark"
