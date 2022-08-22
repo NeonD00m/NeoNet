@@ -1,5 +1,6 @@
 --[=[
     @class NeoNet
+
     Based off of 'Net' by sleitnick with added features
     similar to other networking modules.
 ]=]

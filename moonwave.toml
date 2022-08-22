@@ -1,0 +1,32 @@
+title = "NeoNet"  # From Git
+gitRepoUrl = "https://github.com/NeonD00m/NeoNet" # From Git
+
+gitSourceBranch = "master"
+changelog = true
+classOrder = []
+
+[docusaurus]
+onBrokenLinks = "throw"
+onBrokenMarkdownLinks = "warn"
+favicon = "NeoNetLogo.ico"
+
+# From git:
+organizationName = "NeonD00m"
+projectName = "NeoNet"
+url = "https://NeonD00m.github.io"
+baseUrl = "NeoNet/"
+tagline = "Simple yet powerful networking library"
+
+[navbar]
+hideableSidebar = true
+
+[footer]
+style = "dark"
+copyright = "Copyright © 2022 NeonD00m. Built with Moonwave and Docusaurus"
+
+[[footer.links]]
+title = "examples"
+
+[[footer.links.items]]
+label = "example"
+href = "https://example.com/"
