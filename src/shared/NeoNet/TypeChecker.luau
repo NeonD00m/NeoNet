@@ -2,7 +2,8 @@
     @class TypeChecker
 
     :::tip
-    This should be constructed for each connection.
+    This should be constructed for each connection,
+    or each connection with the same types.
     :::
 
     Constructs a middleware function with the settings you select.
@@ -13,6 +14,8 @@
         --do something
     end, TypeChecker{"string", "number"})
     ```
+
+    if you want to create your own middleware check out the docs page on it.
 ]=]
 return function(types: {number: string})--constructor
     return function(player, parameters)--actual middleware

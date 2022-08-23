@@ -57,7 +57,6 @@ local NeoNet = {
 --[[
     CLIENT & SERVER METHODS
 ]]
-
 --[=[
 	Gets a RemoteEvent with the given name.
 	On the server, if the RemoteEvent does not exist, then
@@ -203,7 +202,6 @@ if IsServer then
     --[[
         SERVER ONLY METHODS
     ]]
-
     --[=[
         @server
         Sets up all the defined RemoteEvents, RemoteFunctions, and RemoteValues.
@@ -245,11 +243,16 @@ if IsServer then
         NeoNet:Connect("SomeEvent", function(player, ...) end)
         ```
     ]=]
-    function NeoNet:Connect(name: string, handler: (...any) -> (), middleware: RemoteServerMiddleware): RBXScriptConnection --add middleware
+    function NeoNet:Connect(name: string, handler: (...any) -> (), middleware: RemoteServerMiddleware): RBXScriptConnection
         if not IsRunning then return end
         return self:RemoteEvent(name).OnServerEvent:Connect(function(player, ...)
-            if not middleware or middleware({...}) then
-                handler(player, ...)
+            if middleware then
+                local result, params = middleware(player, {...})
+                if result then
+                    handler(if params then table.unpack(params) else ...)
+                end
+            else
+                handler(...)
             end
         end)
     end
@@ -298,12 +301,16 @@ else
     --[[
         CLIENT ONLY METHODS
     ]]
-
     --moonwave documentation is on the server version of this method
-    function NeoNet:Connect(name: string, handler: (...any) -> (), middleware: RemoteClientMiddleware): RBXScriptConnection --add middleware
+    function NeoNet:Connect(name: string, handler: (...any) -> (), middleware: RemoteClientMiddleware): RBXScriptConnection
         if not IsRunning then return end
         return self:RemoteEvent(name).OnClientEvent:Connect(function(...)
-            if not middleware or middleware({...}) then
+            if middleware then
+                local result, params = middleware({...})
+                if result then
+                    handler(if params then table.unpack(params) else ...)
+                end
+            else
                 handler(...)
             end
         end)
@@ -318,11 +325,30 @@ else
         end)
         ```
     ]=]
-    function NeoNet:Observe(name: string, handler: (any))--add middleware
+    function NeoNet:Observe(name: string, handler: (any), middleware: RemoteClientMiddleware)
         if not IsRunning then return end
         local r = self:RemoteValue(name)
-        handler(r.Value)
-        return r.Event.OnClientEvent:Connect(handler)
+
+        --initial value
+        if middleware then
+            local result, params = middleware({r})
+            if result then
+                handler(if params then table.unpack(params) else r)
+            end
+        else
+            handler(r)
+        end
+
+        return r.Event.OnClientEvent:Connect(function(...)
+            if middleware then
+                local result, params = middleware({...})
+                if result then
+                    handler(if params then table.unpack(params) else ...)
+                end
+            else
+                handler(...)
+            end
+        end)
     end
 
     --[=[
