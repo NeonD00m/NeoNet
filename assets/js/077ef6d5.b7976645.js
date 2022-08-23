@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[744],{63891:e=>{e.exports=JSON.parse('{"sourceUrl":"https://github.com/NeonD00m/NeoNet/blob/main","baseUrl":"/neonet/","classOrder":[{"classes":["NeoNet"]},{"section":"Middleware","classes":["RateLimiter","TypeChecker"]}],"apiCategories":[]}')}}]);
