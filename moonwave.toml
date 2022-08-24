@@ -34,10 +34,10 @@ title = ""
 alt = "NeoNet"
 src = "https://cdn.discordapp.com/attachments/997871955199926386/1011762294658715808/NeoNetLogoFull478x256.png"
 
-[[navbar.items]]
-href = "https://discord.gg/eJAHVeEPkq"
-label = "Velvera Open Source Discord"
-position = "right"
+# [[navbar.items]]
+# href = "https://discord.gg/eJAHVeEPkq"
+# label = "Velvera Open Source Discord"
+# position = "right"
 
 [[navbar.items]]
 href = "https://twitter.com/NeonD00m"

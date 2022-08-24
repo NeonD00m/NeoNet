@@ -10,5 +10,5 @@
 /*.ServerPackages
 
 # moonwave
-/*.build
-/build
+build
+node_modules

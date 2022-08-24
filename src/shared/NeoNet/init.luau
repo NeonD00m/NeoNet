@@ -15,7 +15,7 @@
 export type RemoteSetupInfo = {
     RemoteEvents: {string}?,
     RemoteFunctions: {string}?,
-    RemoteValues: {string: any?},
+    RemoteValues: {string: any}?,
 }
 
 --[=[
@@ -132,7 +132,7 @@ end
 	local remoteValue = NeoNet:RemoteValue("ButtonClicks")
 	```
 ]=]
-function NeoNet:RemoteValue(name: string, value: any)
+function NeoNet:RemoteValue<T>(name: string, value: T)
     name = "RV/" .. name
     if IsServer then
         local r = script:FindFirstChild(name)
@@ -244,7 +244,7 @@ if IsServer then
         NeoNet:Connect("SomeEvent", function(player, ...) end)
         ```
     ]=]
-    function NeoNet:Connect(name: string, handler: (...any) -> (), middleware: RemoteServerMiddleware): RBXScriptConnection
+    function NeoNet:Connect(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware): RBXScriptConnection
         if not IsRunning then return end
         return self:RemoteEvent(name).OnServerEvent:Connect(function(player, ...)
             if middleware then
@@ -267,7 +267,7 @@ if IsServer then
         end)
         ```
     ]=]
-    function NeoNet:Handle(name: string, handler: (player: Player, ...any) -> ...any)--add middleware
+    function NeoNet:Handle(name: string, handler: (player: Player, ...any) -> ...any) --add middleware
         if not IsRunning then return end
         self:RemoteFunction(name).OnServerInvoke = handler
     end
@@ -284,7 +284,7 @@ if IsServer then
         local r = self:RemoteValue(name)
         if r and r.Value ~= value then
             r.Value = value
-            return r.Event:FireAllClients(value)
+            r.Event:FireAllClients(value)
         end
     end--add set for, except, and other things
 
@@ -303,7 +303,7 @@ else
         CLIENT ONLY METHODS
     ]]
     --moonwave documentation is on the server version of this method
-    function NeoNet:Connect(name: string, handler: (...any) -> (), middleware: RemoteClientMiddleware): RBXScriptConnection
+    function NeoNet:Connect(name: string, handler: (...any) -> nil, middleware: RemoteClientMiddleware): RBXScriptConnection
         if not IsRunning then return end
         return self:RemoteEvent(name).OnClientEvent:Connect(function(...)
             if middleware then
