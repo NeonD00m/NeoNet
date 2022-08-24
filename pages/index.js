@@ -149,7 +149,8 @@ export default function Home() {
       <HomepageHeader />
       <main>
         <p className={styles.tagline}>
-            NeoNet is a networking module for Roblox. It simplifies the process of networking while also providing more utility. 
+            NeoNet is a networking module for Roblox. It simplifies the process of networking while also providing more utility.
+            Based off of Net (sleitnick) with added features inspired by RbxNet (Vorlias) and Comm (sleitnick). Massive credit goes to all of those libraries.
         </p>
         <HomepageFeatures />
       </main>
