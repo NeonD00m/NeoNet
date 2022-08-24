@@ -1,5 +1,4 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local NeoNet = require(ReplicatedStorage:WaitForChild("NeoNet"))
+local NeoNet = require(game:GetService("ReplicatedStorage"):WaitForChild("NeoNet"))
 
 NeoNet:Observe("ButtonClicks", function(newValue)
 	workspace.Button.BillboardGui.TextLabel.Text = tostring(newValue) .. " Clicks"
