@@ -1,3 +1,4 @@
+--!strict
 --[=[
     @class NeoNet
 
@@ -12,9 +13,9 @@
     The information that should be sent into NeoNet:Setup
 ]=]
 export type RemoteSetupInfo = {
-    RemoteEvents: {string},
-    RemoteFunctions: {string},
-    RemoteValues: {string: any},
+    RemoteEvents: {string}?,
+    RemoteFunctions: {string}?,
+    RemoteValues: {string: any?},
 }
 
 --[=[
@@ -24,8 +25,8 @@ export type RemoteSetupInfo = {
     Type for client middleware. [See how to create your own middleware here.](/docs/CustomMiddleware)
 ]=]
 export type RemoteClientMiddleware = (
-    Parameters: {number: any}
-) -> (boolean, {number: any})
+    Parameters: {number: any}?
+) -> (boolean, {number: any}?)
 
 --[=[
     @within NeoNet
@@ -35,8 +36,8 @@ export type RemoteClientMiddleware = (
 ]=]
 export type RemoteServerMiddleware = (
     Player: Player,
-    Parameters: {number: any}
-) -> (boolean, {number: any})
+    Parameters: {number: any}?
+) -> (boolean, {number: any}?)
 
 local RunService = game:GetService("RunService")
 local IsServer = RunService:IsServer()

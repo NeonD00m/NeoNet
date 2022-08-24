@@ -1,3 +1,4 @@
+--!strict
 --[=[
     @class RateLimiter
 
@@ -16,7 +17,7 @@
 
     if you want to create your own middleware check out the docs page on it.
 ]=]
-return function(maxRequests: number, isPerSeconds: boolean)--constructor
+return function(maxRequests: number, isPerSeconds: boolean?)--constructor
     if not isPerSeconds then
         maxRequests /= 60
     end
