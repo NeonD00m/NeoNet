@@ -2,15 +2,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local NeoNet = require(ReplicatedStorage:WaitForChild("NeoNet"))
 local RateLimiter = require(NeoNet.Middleware.RateLimiter)
 
-NeoNet:Setup {
-	RemoteEvents = {
-		"ClickRequest"
-	},
-	RemoteValues = {
-		ButtonClicks = 0
-	}
-}
-NeoNet:RemoteEvent("ClickRequest")
+-- NeoNet:Setup {
+-- 	RemoteEvents = {
+-- 		"ClickRequest"
+-- 	},
+-- 	RemoteValues = {
+-- 		ButtonClicks = 0
+-- 	}
+-- }
+-- NeoNet:RemoteEvent("ClickRequest")
 NeoNet:RemoteValue("ButtonClicks", 0)
 
 NeoNet:Connect("ClickRequest", function()

@@ -18,9 +18,9 @@ NeoNet is a networking module made to combine simple API with advanced utility.
 - Many similar libraries, complicate the api a lot and result in having massive function calls to setup up remotes for the game.
 - We don't want to provide a library that is bad.
 
-## Performance today
+<!-- ## Performance today
 
-NeoNet currently achieves an average frame time of ___ms spent inside Matter code for the following benchmark:
+NeoNet currently achieves an average frame time of ___ms spent inside NeoNet code for the following benchmark: -->
 
 <!-- - World with 1000 entities
 - Between 2-30 components on each entity

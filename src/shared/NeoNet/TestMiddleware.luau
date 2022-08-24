@@ -6,3 +6,11 @@ return function(player, parameters)
     end
     return true
 end
+
+--[[
+local GROUP_ID = 2664663
+
+return function(player)
+    return player:GetRankInGroup(GROUP_ID) >= 250
+end
+]]

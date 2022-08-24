@@ -21,9 +21,10 @@ const FEATURES = [
          :Connect() already calls it. 
         <br />
         <br />
-        The RemoteEvent, RemoteFunction, and RemoteValue functions are only necessary
+        The RemoteEvent and RemoteFunction functions are only necessary
          because the server needs to create the instances before,
          or less than 10 seconds after the client tries to access it.
+         However RemoteValues need to be initiated to have a starting value.
       </>
     ),
   },

@@ -19,24 +19,24 @@ export type RemoteSetupInfo = {
 
 --[=[
     @within NeoNet
-    @type RemoteClientMiddleware (Parameters: {number: any},) -> (boolean)
+    @type RemoteClientMiddleware (Parameters: {number: any},) -> (boolean, {number: any})
 
-    Type for client middleware.
+    Type for client middleware. [See how to create your own middleware here.](/docs/CustomMiddleware)
 ]=]
 export type RemoteClientMiddleware = (
     Parameters: {number: any}
-) -> (boolean)
+) -> (boolean, {number: any})
 
 --[=[
     @within NeoNet
-    @type RemoteServerMiddleware (Player: Player,Parameters: {number: any}) -> (boolean)
+    @type RemoteServerMiddleware (Player: Player,Parameters: {number: any}) -> (boolean, {number: any})
 
-    Type for server middleware.
+    Type for server middleware. [See how to create your own middleware here.](/docs/CustomMiddleware)
 ]=]
 export type RemoteServerMiddleware = (
     Player: Player,
     Parameters: {number: any}
-) -> (boolean)
+) -> (boolean, {number: any})
 
 local RunService = game:GetService("RunService")
 local IsServer = RunService:IsServer()
@@ -249,7 +249,7 @@ if IsServer then
             if middleware then
                 local result, params = middleware(player, {...})
                 if result then
-                    handler(if params then table.unpack(params) else ...)
+                    handler(player, if params then table.unpack(params) else ...)
                 end
             else
                 handler(...)
