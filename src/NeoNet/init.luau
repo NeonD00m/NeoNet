@@ -185,17 +185,34 @@ function NeoNet:GetValue(name: string): any
 end
 
 --[=[
-	Fires the given RemoteEvent.
+	Fires the given RemoteEvent. Will Fire to all clients if used from the server
 	```lua
 	NeoNet:Fire("SomeEvent", someParameters)
 	```
+    :::caution
+    If the last parameter is a function then it will use that as middleware
+    :::
 ]=]
 function NeoNet:Fire(name: string, ...: any)
     if not IsRunning then return end
-    if IsServer then
-        self:RemoteEvent(name):FireAllClients(...)
+    local params1 = {...}
+    local lastArg = params1[#params1]
+    if type(lastArg) == "function" then
+        table.remove(params1, #params1)
+        local result, params2 = lastArg(params1)
+        if result then
+            if IsServer then
+                self:RemoteEvent(name):FireAllClients(if params2 then table.unpack(params2) else ...)
+            else
+                self:RemoteEvent(name):FireServer(if params2 then table.unpack(params2) else ...)
+            end
+        end
     else
-        self:RemoteEvent(name):FireServer(...)
+        if IsServer then
+            self:RemoteEvent(name):FireAllClients(...)
+        else
+            self:RemoteEvent(name):FireServer(...)
+        end
     end
 end--add fire for, except, and other things
 
@@ -234,6 +251,83 @@ if IsServer then
     end
 
     --[=[
+        @server
+        Fires the given RemoteEvent to the specified player.
+        ```lua
+        NeoNet:FireFor("SomeEvent", somePlayer, someParameters)
+        ```
+    ]=]
+    function NeoNet:FireFor(name: string, player: Player, ...: any)
+        if not IsRunning then return end
+        local params1 = {...}
+        local lastArg = params1[#params1]
+        if type(lastArg) == "function" then
+            table.remove(params1, #params1)
+            local result, params2 = lastArg(params1)
+            if result then
+                self:RemoteEvent(name):FireClient(player, if params2 then table.unpack(params2) else ...)
+            end
+        else
+            self:RemoteEvent(name):FireClient(player, ...)
+        end
+    end
+
+    --[=[
+        @server
+        Fires the given RemoteEvent to all players except the specified player.
+        ```lua
+        NeoNet:FireExcept("SomeEvent", somePlayer, someParameters)
+        ```
+    ]=]
+    function NeoNet:FireExcept(name: string, player: Player, ...: any)
+        if not IsRunning then return end
+        local params1 = {...}
+        local lastArg = params1[#params1]
+        if type(lastArg) == "function" then
+            table.remove(params1, #params1)
+            local result, params2 = lastArg(params1)
+            if result then
+                self:RemoteEvent(name):FireExcept(player, if params2 then table.unpack(params2) else ...)
+            end
+        else
+            self:RemoteEvent(name):FireExcept(player, ...)
+        end
+    end
+
+    --[=[
+        @server
+        Fires the given RemoteEvent to all specified players.
+
+        ```lua
+        NeoNet:FireList("SomeEvent", {somePlayer1, somePlayer2}, someParameters)
+        ```
+
+        :::caution
+        Uses RemoteClientMiddleware for now due to uncertainty
+        around how to handle a list of players for middleware.
+        :::
+    ]=]
+    function NeoNet:FireList(name: string, players: {Player}, ...: any)
+        if not IsRunning then return end
+        local params1 = {...}
+        local lastArg = params1[#params1]
+        if type(lastArg) == "function" then
+            table.remove(params1, #params1)
+            local result, params2 = lastArg(params1)
+            if result then
+                for _, player in players do
+                    self:RemoteEvent(name):FireClient(player, if params2 then table.unpack(params2) else ...)
+                end
+            end
+        else
+            for _, player in players do
+                self:RemoteEvent(name):FireClient(player, ...)
+            end
+        end
+    end
+
+    --[=[
+        @server
         Connects a handler function to the given RemoteEvent.
         ```lua
         -- Client
@@ -267,9 +361,19 @@ if IsServer then
         end)
         ```
     ]=]
-    function NeoNet:Handle(name: string, handler: (player: Player, ...any) -> ...any) --add middleware
+    function NeoNet:Handle(name: string, handler: (player: Player, ...any) -> ...any, middleware: RemoteServerMiddleware)
         if not IsRunning then return end
-        self:RemoteFunction(name).OnServerInvoke = handler
+        -- self:RemoteFunction(name).OnServerInvoke = handler
+        self:RemoteFunction(name).OnServerInvoke = function(player, ...)
+            if middleware then
+                local result, params = middleware(player, {...})
+                if result then
+                    return handler(player, if params then table.unpack(params) else ...)
+                end
+            else
+                return handler(player, ...)
+            end
+        end
     end
 
     --[=[
@@ -359,9 +463,20 @@ else
         local points = NeoNet:Invoke("GetPoints")
         ```
     ]=]
-    function NeoNet:Invoke(name: string, ...: any): ...any--add middleware
+    function NeoNet:Invoke(name: string, ...: any): ...any
         if not IsRunning then return end
-        return self:RemoteFunction(name):InvokeServer(...)
+        -- return self:RemoteFunction(name):InvokeServer(...)
+        local lastArg = {...}
+        lastArg = lastArg[#lastArg]
+        if type(lastArg) == "function" then
+            local result, params = lastArg({...})
+            if result then
+                return self:RemoteFunction(name):InvokeServer(if params then table.unpack(params) else ...)
+            end
+            --else request dropped by middleware
+        else
+            return self:RemoteFunction(name):InvokeServer(...)
+        end
     end
 end
 
