@@ -9,7 +9,7 @@ import styles from "./index.module.css";
 const FEATURES = [
   {
     image: "https://cdn.discordapp.com/attachments/997871955199926386/1011749934963376198/carbonRemoteEvent.png",
-    title: "Simple & Extensive API",
+    title: "Simple & Powerful API",
     description: (
       <>
         NeoNet is designed in a way to remove objects and instances from your code,

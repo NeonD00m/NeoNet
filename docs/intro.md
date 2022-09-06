@@ -10,13 +10,13 @@ NeoNet is a networking module made to combine simple API with advanced utility.
 
 - Simple, obvious API
 - Performant
-- Common patterns are easy to fall into and hard to mess up
+- Eliminating OOP and instances to save time for the developer
 - Steal all the cool ideas and modules from other libraries so that this is the best in every way.
 
 ## Non-goals
 
-- Many similar libraries, complicate the api a lot and result in having massive function calls to setup up remotes for the game.
-- We don't want to provide a library that is bad.
+- Many similar libraries, complicate the api a lot and result in having massive function calls to setup up remotes for the game, which is why simply calling :Connect for example will create the remote.
+- I don't want to provide a library that is bad.
 
 <!-- ## Performance today
 

@@ -5,6 +5,9 @@ sidebar_position: 3
 # Getting Started
 
 Here's how you can use NeoNet for a project.
+:::tip
+NeoNet is only available as a wally package or by downloading it from Github because I'm too lazy to make a roblox model for this
+:::
 
 First, on the server just require NeoNet through wally's packages or another location.
 ```lua
