@@ -185,11 +185,11 @@ function NeoNet:GetValue(name: string): any
 end
 
 --[=[
-	Fires the given RemoteEvent. Will Fire to all clients if used from the server
-	```lua
-	NeoNet:Fire("SomeEvent", someParameters)
-	```
-    :::caution
+    Fires the given RemoteEvent. Will Fire to all clients if used from the server
+    ```lua
+    NeoNet:Fire("SomeEvent", someParameters, middleware?)
+    ```
+    :::tip
     If the last parameter is a function then it will use that as middleware
     :::
 ]=]
@@ -254,7 +254,7 @@ if IsServer then
         @server
         Fires the given RemoteEvent to the specified player.
         ```lua
-        NeoNet:FireFor("SomeEvent", somePlayer, someParameters)
+        NeoNet:FireFor("SomeEvent", somePlayer, someParameters, middleware?)
         ```
     ]=]
     function NeoNet:FireFor(name: string, player: Player, ...: any)
@@ -276,7 +276,7 @@ if IsServer then
         @server
         Fires the given RemoteEvent to all players except the specified player.
         ```lua
-        NeoNet:FireExcept("SomeEvent", somePlayer, someParameters)
+        NeoNet:FireExcept("SomeEvent", somePlayer, someParameters, middleware?)
         ```
     ]=]
     function NeoNet:FireExcept(name: string, player: Player, ...: any)
@@ -299,7 +299,7 @@ if IsServer then
         Fires the given RemoteEvent to all specified players.
 
         ```lua
-        NeoNet:FireList("SomeEvent", {somePlayer1, somePlayer2}, someParameters)
+        NeoNet:FireList("SomeEvent", {somePlayer1, somePlayer2}, someParameters, middleware?)
         ```
 
         :::caution
