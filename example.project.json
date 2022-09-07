@@ -1,0 +1,49 @@
+{
+    "name": "neonet",
+    "tree": {
+        "$className": "DataModel",
+    
+        "ReplicatedStorage": {
+            "$className": "ReplicatedStorage",
+            "$path": "example/shared",
+            "$ignoreUnknownInstances": true,
+    
+            "Packages": {
+            "$path": "Packages"
+            }
+        },
+        "ServerScriptService": {
+            "$className": "ServerScriptService",
+            "$path": "example/server",
+            "$ignoreUnknownInstances": true,
+            
+            "ServerPackages": {
+            "$path": "ServerPackages"
+            }
+        },
+    
+        "StarterPlayer": {
+            "$className": "StarterPlayer",
+            "StarterCharacterScripts": {
+            "$className": "StarterCharacterScripts",
+            "$ignoreUnknownInstances": true,
+            "$path": "example/StarterPlayer/StarterCharacterScripts"
+            },
+    
+            "StarterPlayerScripts": {
+            "$className": "StarterPlayerScripts",
+            "$ignoreUnknownInstances": true,
+            "$path": "example/client"
+            },
+    
+            "$ignoreUnknownInstances": true
+        },
+    
+        "SoundService": {
+            "$className": "SoundService",
+            "$properties": {
+            "RespectFilteringEnabled": true
+            }
+        }
+    }
+}
