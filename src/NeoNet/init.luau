@@ -45,6 +45,7 @@ local IsRunning = RunService:IsRunning()
 
 local RemoteValues = {}
 local NeoNet = {
+    Parent = script,
     Middleware = script,--so you can do NeoNet.Middleware.TestMiddleware
 }
 
@@ -58,6 +59,24 @@ local NeoNet = {
 --[[
     CLIENT & SERVER METHODS
 ]]
+--[=[
+    This method is only intended to be used for combining with/adapting to other systems or to organize your remotes in a more accessible place.
+	:::caution
+    It will make NeoNet unable to access remotes created without calling UseParent with the same Parent in the other scripts.
+    :::
+    Example case:
+    \/ReplicatedStorage
+       \/Remotes
+          PointsChanged
+	```lua
+	NeoNet:UseParent(ReplicatedStorage.Remotes)
+	local remoteEvent = NeoNet:RemoteEvent("PointsChanged")
+	```
+]=]
+function NeoNet:UseParent(parent: Instance): RemoteEvent
+    NeoNet.Parent = if typeof(parent) == "userdata" then parent else script
+end
+
 --[=[
 	Gets a RemoteEvent with the given name.
 	On the server, if the RemoteEvent does not exist, then
@@ -73,7 +92,7 @@ local NeoNet = {
 function NeoNet:RemoteEvent(name: string): RemoteEvent
     name = "RE/" .. name
     if IsServer then
-		local r = script:FindFirstChild(name)
+		local r = NeoNet.Parent:FindFirstChild(name)
 		if not r then
 			r = Instance.new("RemoteEvent")
 			r.Name = name
@@ -81,7 +100,7 @@ function NeoNet:RemoteEvent(name: string): RemoteEvent
 		end
 		return r
 	else
-		local r = script:WaitForChild(name, 10)
+		local r = NeoNet.Parent:WaitForChild(name, 10)
 		if not r then
 			error("Failed to find RemoteEvent: " .. name, 2)
 		end
@@ -104,15 +123,15 @@ end
 function NeoNet:RemoteFunction(name: string): RemoteFunction
     name = "RF/" .. name
     if IsServer then
-		local r = script:FindFirstChild(name)
+		local r = NeoNet.Parent:FindFirstChild(name)
 		if not r then
 			r = Instance.new("RemoteFunction")
 			r.Name = name
-			r.Parent = script
+			r.Parent = NeoNet.Parent
 		end
 		return r
 	else
-		local r = script:WaitForChild(name, 10)
+		local r = NeoNet.Parent:WaitForChild(name, 10)
 		if not r then
 			error("Failed to find RemoteFunction: " .. name, 2)
 		end
@@ -135,11 +154,11 @@ end
 function NeoNet:RemoteValue<T>(name: string, value: T)
     name = "RV/" .. name
     if IsServer then
-        local r = script:FindFirstChild(name)
+        local r = NeoNet.Parent:FindFirstChild(name)
         if not r then
             r = Instance.new("RemoteEvent")
             r.Name = name
-            r.Parent = script
+            r.Parent = NeoNet.Parent
             RemoteValues[name] = {
                 Event = r,
                 Value = value,
@@ -150,7 +169,7 @@ function NeoNet:RemoteValue<T>(name: string, value: T)
         end
         return RemoteValues[name]
     else
-        local r = script:WaitForChild(name, 10)
+        local r = NeoNet.Parent:WaitForChild(name, 10)
 		if not r then
 			error("Failed to find RemoteValue: " .. name, 2)
 		end
@@ -399,7 +418,7 @@ if IsServer then
         and not during runtime.
     ]=]
     function NeoNet:Clean()
-        script:ClearAllChildren()
+        NeoNet.Parent:ClearAllChildren()
         table.clear(RemoteValues)
     end
 else
