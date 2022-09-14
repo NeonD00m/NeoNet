@@ -15,12 +15,17 @@ type RemoteServerMiddleware = (
 
 // NeoNet type
 declare namespace NeoNet {
+    export type UseParent = (parent: Instance) => undefined
     export type RemoteEvent = (name: string) => RemoteEvent
     export type RemoteFunction = (name: string) => RemoteFunction
     export type RemoteValue<T> = (name: string, value: T) => {Event: RemoteEvent, Value: T}
 
     export type GetValue = (name: string) => any
     export type Fire = (name: string, ...args: any) => undefined
+    export type FireFor = (name: string, player: Player, ...args: any) => undefined
+    export type FireExcept = (name: string, player: Player, ...args: any) => undefined
+    export type FireList = (name: string, players: {Player}, ...args: any) => undefined
+
 
     // server-only
     export type Setup = (info: RemoteSetupInfo) => undefined
