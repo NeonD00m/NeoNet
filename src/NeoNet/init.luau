@@ -237,8 +237,11 @@ end--add fire for, except, and other things
 
 --[=[
     Connects a handler function to the given RemoteEvent and disconnects after the first event.
+    :::caution
+    If the middleware drops the request it will still be disconnected, use NeoNet:ConnectUntil if you want to only disconnect after middleware passes an event.
+    :::
     ```lua
-    NeoNet:Once("SomeEvent", function(...) end)
+    NeoNet:ConnectOnce("SomeEvent", function(...) end)
     ```
 ]=]
 function NeoNet:ConnectOnce(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware | RemoteClientMiddleware)
@@ -265,6 +268,21 @@ function NeoNet:ConnectOnce(name: string, handler: (...any) -> nil, middleware: 
             end
         end
     end)
+end
+
+--[=[
+    Connects a handler function to the given RemoteEvent and disconnects after the first event that passes the middleware.
+    (Similar to :ConnectOnce but it only disconnects after the middleware has continued a request.)
+    ```lua
+    NeoNet:ConnectUntil("SomeEvent", function(...) end, someMiddleware)
+    ```
+]=]
+function NeoNet:ConnectUntil(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware | RemoteClientMiddleware)
+    local connection = nil
+    connection = self:Connect(name, function(...)
+        connection:Disconnect()
+        handler(...)
+    end, middleware)
 end
 
 if IsServer then
