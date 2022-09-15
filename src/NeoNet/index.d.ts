@@ -26,10 +26,11 @@ declare namespace NeoNet {
     export type FireExcept = (name: string, player: Player, ...args: any) => undefined
     export type FireList = (name: string, players: {Player}, ...args: any) => undefined
 
+    export type ConnectOnce = (name: string, handler: (...args: any) => undefined, middleware: RemoteServerMiddleware | RemoteClientMiddleware) => RBXScriptConnection
 
     // server-only
     export type Setup = (info: RemoteSetupInfo) => undefined
-    export type Connect = (name: string, handler: (...args: any) => undefined, middleware: RemoteServerMiddleware) => RBXScriptConnection
+    export type Connect = (name: string, handler: (...args: any) => undefined, middleware: RemoteServerMiddleware | RemoteClientMiddleware) => RBXScriptConnection
     export type Handle = (name: string, handler: (player: Player, ...args: any) => LuaTuple<[...args: any]>) => undefined
     export type SetValue = (name: string, value: any) => undefined
     export type Clean = (undefined)

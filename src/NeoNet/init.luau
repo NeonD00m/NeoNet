@@ -235,6 +235,38 @@ function NeoNet:Fire(name: string, ...: any)
     end
 end--add fire for, except, and other things
 
+--[=[
+    Connects a handler function to the given RemoteEvent and disconnects after the first event.
+    ```lua
+    NeoNet:Once("SomeEvent", function(...) end)
+    ```
+]=]
+function NeoNet:ConnectOnce(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware | RemoteClientMiddleware)
+    local connection = nil
+    connection = self:Connect(name, function(player, ...)
+        connection:Disconnect()
+        if IsServer then
+            if middleware then
+                local result, params = middleware(player, {...})
+                if result then
+                    handler(player, if params then table.unpack(params) else ...)
+                end
+            else
+                handler(...)
+            end
+        else
+            if middleware then
+                local result, params = middleware({player, ...})
+                if result then
+                    handler(player, if params then table.unpack(params) else ...)
+                end
+            else
+                handler(...)
+            end
+        end
+    end)
+end
+
 if IsServer then
     --[[
         SERVER ONLY METHODS
