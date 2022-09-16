@@ -1,1 +1,1 @@
-export type RateLimiter = (maxRequests: number, isPerSeconds: boolean | null) => (Player, {number: any}) => boolean
+export type RateLimiter = (maxRequests: number | {[1]: number, [2]: number}, isPerSeconds: boolean | null) => (Player, {any}) => boolean

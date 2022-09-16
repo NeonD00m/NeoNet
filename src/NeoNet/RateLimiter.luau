@@ -13,11 +13,39 @@
     NeoNet:Connect("SomeEvent", function()
         --do something
     end, RateLimiter(0.5, true))
+
+    --OR if you want to dynamically change the rate use it like this:
+    local limiterInfo = {60, true}
+    NeoNet:Connect("SomeEvent", function()
+        --do something
+    end, RateLimiter(limiterInfo))
+    --later/somewhere else
+    limiterInfo[1] = 30
     ```
 
     if you want to create your own middleware check out the docs page on it.
 ]=]
-return function(maxRequests: number, isPerSeconds: boolean?)--constructor
+local function dynamicLimiter(info: {number})
+    local lastRequest = 0
+
+    return function()--actual middleware
+        local unit = if not info[2] then 60 else 1
+        local intervalTime = 1 / (info[1] / unit)
+
+        local result = lastRequest + intervalTime <= os.clock()
+        if result then
+            lastRequest = os.clock()
+        end
+        return result
+    end
+end
+
+return function(maxRequests: number | {number}, isPerSeconds: boolean?)--constructor
+    if type(maxRequests) == "table" then
+        return dynamicLimiter(maxRequests)
+    end
+
+    --static limiter
     if not isPerSeconds then
         maxRequests /= 60
     end
