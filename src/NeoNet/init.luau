@@ -400,8 +400,7 @@ if IsServer then
     end
 
     --[=[
-        @server
-        Connects a handler function to the given RemoteEvent.
+        Connects a handler function to the given RemoteEvent. (Server & Client)
         ```lua
         -- Client
         NeoNet:Connect("PointsChanged", function(points)
