@@ -3,7 +3,7 @@
     @class TypeChecker
 
     :::tip
-    This should be constructed for each connection,
+    This should be constructed for each connection
     or each connection with the same types.
     :::
 

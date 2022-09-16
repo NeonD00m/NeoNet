@@ -40,13 +40,13 @@ local function dynamicLimiter(info: {number})
     end
 end
 
-return function(maxRequests: number | {number}, isPerSeconds: boolean?)--constructor
+return function(maxRequests: number | {number}, isPerSecond: boolean?)--constructor
     if type(maxRequests) == "table" then
         return dynamicLimiter(maxRequests)
     end
 
     --static limiter
-    if not isPerSeconds then
+    if not isPerSecond then
         maxRequests /= 60
     end
 

@@ -291,6 +291,10 @@ if IsServer then
     ]]
     --[=[
         @server
+        :::caution
+        deprecated (as of v1.2.0) or something please don't use;
+        this type of setup was exactly what I wanted to avoid with NeoNet
+        :::
         Sets up all the defined RemoteEvents, RemoteFunctions, and RemoteValues.
         ```lua
         NeoNet:Setup {
@@ -302,7 +306,7 @@ if IsServer then
             }
         }
         ```
-    ]=]
+    -- ]=]
     function NeoNet:Setup(info: RemoteSetupInfo)
         if info and info.RemoteEvents then
             for _, name in info.RemoteEvents do
@@ -454,7 +458,7 @@ if IsServer then
     ]=]
     function NeoNet:SetValue(name: string, value: any)
         if not IsRunning then return end
-        local r = self:RemoteValue(name)
+        local r = self:RemoteValue(name, value)
         if r and r.Value ~= value then
             r.Value = value
             r.Event:FireAllClients(value)
@@ -492,7 +496,7 @@ else
 
     --[=[
         @client
-        Connects a function to the given RemoteValue.
+        Connects a function to the given RemoteValue, which will be called each time the value changes + when initially observed.
         ```lua
         NeoNet:Observe("ButtonClicks", function(newValue)
             print(tostring(newValue) .. " Clicks")
