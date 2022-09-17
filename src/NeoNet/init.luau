@@ -61,17 +61,13 @@ local NeoNet = {
 ]]
 --[=[
     This method is only intended to be used for combining with/adapting to other systems or to organize your remotes in a more accessible place.
-	:::caution
+    :::caution
     It will make NeoNet unable to access remotes created without calling UseParent with the same Parent in the other scripts.
     :::
-    Example case:
-    \/ReplicatedStorage
-       \/Remotes
-          PointsChanged
-	```lua
-	NeoNet:UseParent(ReplicatedStorage.Remotes)
-	local remoteEvent = NeoNet:RemoteEvent("PointsChanged")
-	```
+    ```lua
+    NeoNet:UseParent(ReplicatedStorage.Remotes)
+    local remoteEvent = NeoNet:RemoteEvent("PointsChanged")
+    ```
 ]=]
 function NeoNet:UseParent(parent: Instance): RemoteEvent
     NeoNet.Parent = if typeof(parent) == "userdata" then parent else script
@@ -306,7 +302,7 @@ if IsServer then
             }
         }
         ```
-    -- ]=]
+    ]=]
     function NeoNet:Setup(info: RemoteSetupInfo)
         if info and info.RemoteEvents then
             for _, name in info.RemoteEvents do
