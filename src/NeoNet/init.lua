@@ -516,8 +516,10 @@ if IsServer then
         local r = self:RemoteValue(name, value)
         if r then
             for _, player in players do
-                r.Specific[player] = value
-                r.Event:FireClient(player, if value ~= nil then value else r.Value)
+                if r.Specific[player] ~= value then
+                    r.Specific[player] = value
+                    r.Event:FireClient(player, if value ~= nil then value else r.Value)
+                end
             end
         end
     end
@@ -564,6 +566,7 @@ if IsServer then
     --[=[
         @server
         Gets the player-specific value for the given RemoteValue.
+        If there is no player-specific value, the top value will be returned.
         ```lua
         local role = NeoNet:GetFor("Role", SomePlayer)
         ```
@@ -571,9 +574,10 @@ if IsServer then
     function NeoNet:GetFor(name: string, player: Player): any
         if not IsRunning then return end
         local r = self:RemoteValue(name)
-        if r then
+        if r  and r.Specific[player] ~= nil then
             return r.Specific[player]
         end
+        return r.Value
     end
 
     --[=[
