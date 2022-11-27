@@ -39,6 +39,7 @@ export type RemoteServerMiddleware = (
     Parameters: {number: any}?
 ) -> (boolean, {number: any}?)
 
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local IsServer = RunService:IsServer()
 local IsRunning = RunService:IsRunning()
@@ -70,7 +71,7 @@ local NeoNet = {
     ```
 ]=]
 function NeoNet:UseParent(parent: Instance): RemoteEvent
-    NeoNet.Parent = if typeof(parent) == "userdata" then parent else script
+    NeoNet.Parent = if typeof(parent) == "Instance" then parent else script
 end
 
 --[=[
@@ -157,14 +158,15 @@ function NeoNet:RemoteValue<T>(name: string, value: T)
             r.Parent = NeoNet.Parent
             RemoteValues[name] = {
                 Event = r,
-                Value = value,
+                Value = value, -- TOP --
+                Specific = {},
                 _connection = r.OnServerEvent:Connect(function(player)
                     r:FireClient(player, RemoteValues[name].Value)
                 end)
             }
         end
         return RemoteValues[name]
-    else
+    else ---- CLIENT ----
         local r = NeoNet.Parent:WaitForChild(name, 10)
 		if not r then
 			error("Failed to find RemoteValue: " .. name, 2)
@@ -172,9 +174,11 @@ function NeoNet:RemoteValue<T>(name: string, value: T)
         if not RemoteValues[name] then
             RemoteValues[name] = {
                 Event = r,
-                Value = value,
+                Ready = false,
+                Value = value, -- PLAYER SPECIFIC/TOP --
                 _connection = r.OnClientEvent:Connect(function(newValue)
                     RemoteValues[name].Value = newValue
+                    RemoteValues[name].Ready = true
                 end)
             }
             r:FireServer()--ask server for current value
@@ -447,6 +451,9 @@ if IsServer then
     --[=[
         @server
         Sets the value for the given RemoteValue.
+        :::caution
+        This will completely ignore player-specific values and change the top value.
+        :::
         ```lua
         NeoNet:SetValue("ButtonClicks", 0)
         ```
@@ -454,11 +461,120 @@ if IsServer then
     function NeoNet:SetValue(name: string, value: any)
         if not IsRunning then return end
         local r = self:RemoteValue(name, value)
-        if r and r.Value ~= value then
+        if r and (r.Value ~= value or #r.Specific > 0) then
             r.Value = value
+            table.clear(r.Specific)
             r.Event:FireAllClients(value)
         end
-    end--add set for, except, and other things
+    end
+
+    --[=[
+        @server
+        Sets the top value for the given RemoteValue.
+        ```lua
+        NeoNet:SetValue("ButtonClicks", 0)
+        ```
+    ]=]
+    function NeoNet:SetTop(name: string, value: any)
+        if not IsRunning then return end
+        local r = self:RemoteValue(name, value)
+        if r and r.Value ~= value then
+            r.Value = value
+            for _, plr in Players:GetPlayers() do
+                if r.Specific[plr] == nil then
+                    r.Event:FireClient(plr, value)
+                end
+            end
+        end
+    end
+
+    --[=[
+        @server
+        Sets the player-specific value for the given RemoteValue.
+        ```lua
+        NeoNet:Setfor("Role", SomePlayer, "Monster")
+        ```
+    ]=]
+    function NeoNet:SetFor(name: string, player: Player, value: any)
+        if not IsRunning then return end
+        local r = self:RemoteValue(name, value)
+        if r and r.Value ~= value then
+            r.Specific[player] = value
+            r.Event:FireClient(player, if value ~= nil then value else r.Value)
+        end
+    end
+
+    --[=[
+        @server
+        Sets the player-specific value for the given set of players, for the given RemoteValue.
+        ```lua
+        NeoNet:SetList("Role", SomePlayers, "Survivors")
+        ```
+    ]=]
+    function NeoNet:SetList(name: string, players: {Player}, value: any)
+        if not IsRunning then return end
+        local r = self:RemoteValue(name, value)
+        if r and r.Value ~= value then
+            for _, player in players do
+                r.Specific[player] = value
+                r.Event:FireClient(player, if value ~= nil then value else r.Value)
+            end
+        end
+    end
+
+    --[=[
+        @server
+        Removes all player-specific values for the given RemoteValue.
+        ```lua
+        NeoNet:ClearValues("Role") --maybe the game ended in this example
+        ```
+    ]=]
+    function NeoNet:ClearValues(name: string)
+        if not IsRunning then return end
+        local r = self:RemoteValue(name)
+        if r then
+            for _, player in r.Specific do
+                NeoNet:SetFor(name, player, nil)
+            end
+        end
+    end
+
+    --[=[
+        @server
+        Removes the player-specific value for the given RemoteValue.
+        ```lua
+        NeoNet:ClearValueFor("Role", SomePlayer) --maybe a survivor died so we remove their role
+        ```
+    ]=]
+    function NeoNet:ClearValueFor(name: string, player: Player)
+        NeoNet:SetFor(name, player, nil)
+    end
+
+    --[=[
+        @server
+        Removes the player-specific value for the given set of players, for the given RemoteValue.
+        ```lua
+        NeoNet:ClearValuesList("Role", SomePlayer) --no idea what the example could be here
+        ```
+    ]=]
+    function NeoNet:ClearValuesList(name: string, players: {Player})
+        NeoNet:SetList(name, players, nil)
+    end
+
+    --[=[
+        @server
+        Gets the player-specific value for the given RemoteValue.
+        ```lua
+        local role = NeoNet:GetFor("Role", SomePlayer)
+        ```
+    ]=]
+    function NeoNet:GetFor(name: string, player: Player): any
+        if not IsRunning then return end
+        local r = self:RemoteValue(name)
+        if r then
+            return r.Specific[player]
+        end
+    end
 
     --[=[
         @server
@@ -545,6 +661,18 @@ else
         else
             return self:RemoteFunction(name):InvokeServer(...)
         end
+    end
+
+    --[=[
+        @client
+        Invokes the RemoteFunction with the given arguments.
+        ```lua
+        local points = NeoNet:Invoke("GetPoints")
+        ```
+    ]=]
+    function NeoNet:IsValueReady(name: string): boolean
+        if not IsRunning then return end
+        return RemoteValues[name].Ready
     end
 end
 
