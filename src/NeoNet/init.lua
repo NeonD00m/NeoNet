@@ -498,7 +498,7 @@ if IsServer then
     function NeoNet:SetFor(name: string, player: Player, value: any)
         if not IsRunning then return end
         local r = self:RemoteValue(name, value)
-        if r and r.Value ~= value then
+        if r and r.Specific[player] ~= value then
             r.Specific[player] = value
             r.Event:FireClient(player, if value ~= nil then value else r.Value)
         end
@@ -514,7 +514,7 @@ if IsServer then
     function NeoNet:SetList(name: string, players: {Player}, value: any)
         if not IsRunning then return end
         local r = self:RemoteValue(name, value)
-        if r and r.Value ~= value then
+        if r then
             for _, player in players do
                 r.Specific[player] = value
                 r.Event:FireClient(player, if value ~= nil then value else r.Value)
