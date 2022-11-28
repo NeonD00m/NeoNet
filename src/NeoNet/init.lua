@@ -70,7 +70,7 @@ local NeoNet = {
     local remoteEvent = NeoNet:RemoteEvent("PointsChanged")
     ```
 ]=]
-function NeoNet:UseParent(parent: Instance): RemoteEvent
+function NeoNet:UseParent(parent: Instance)
     NeoNet.Parent = if typeof(parent) == "Instance" then parent else script
 end
 
@@ -675,9 +675,13 @@ else
         ```
     ]=]
     function NeoNet:IsValueReady(name: string): boolean
-        if not IsRunning then return end
-        return RemoteValues[name].Ready
-    end
+		if not IsRunning then return false end
+		local r = self:RemoteValue(name)
+		if r then
+			return r.Ready
+		end
+		return false
+	end
 end
 
 return NeoNet
