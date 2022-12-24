@@ -1,4 +1,3 @@
---!strict
 --[=[
     @class NeoNet
 
@@ -45,6 +44,7 @@ local IsServer = RunService:IsServer()
 local IsRunning = RunService:IsRunning()
 
 local RemoteValues = {}
+local Listeners = {}
 local NeoNet = {
     Parent = script,
     Middleware = script,--so you can do NeoNet.Middleware.TestMiddleware
@@ -148,7 +148,7 @@ end
 	local remoteValue = NeoNet:RemoteValue("ButtonClicks")
 	```
 ]=]
-function NeoNet:RemoteValue<T>(name: string, value: T)
+function NeoNet:RemoteValue<T>(name: string, value: T): {Event: RemoteEvent, Ready: boolean, Value: any, Specific: {}?, _connection: RBXScriptConnection}
     name = "RV/" .. name
     if IsServer then
         local r = NeoNet.Parent:FindFirstChild(name)
@@ -160,8 +160,8 @@ function NeoNet:RemoteValue<T>(name: string, value: T)
                 Event = r,
                 Value = value, -- TOP --
                 Specific = {},
-                _connection = r.OnServerEvent:Connect(function(player)
-                    r:FireClient(player, RemoteValues[name].Value)
+                _connection = r.OnServerEvent:Connect(function(player) --if specific then return specific else top
+                    r:FireClient(player, if RemoteValues[name].Specific[player] ~= nil then RemoteValues[name].Specific[player] else RemoteValues[name].Value)
                 end)
             }
         end
@@ -176,11 +176,25 @@ function NeoNet:RemoteValue<T>(name: string, value: T)
                 Event = r,
                 Ready = false,
                 Value = value, -- PLAYER SPECIFIC/TOP --
-                _connection = r.OnClientEvent:Connect(function(newValue)
-                    RemoteValues[name].Value = newValue
-                    RemoteValues[name].Ready = true
-                end)
             }
+            RemoteValues[name]._connection = r.OnClientEvent:Connect(function(newValue)
+                if RemoteValues[name] ~= nil then
+					RemoteValues[name].Value = newValue
+					RemoteValues[name].Ready = true
+				else
+					warn("NeoNet Error: OnClientEvent fired for remote with connection but no associated RemoteValue at RemoteValues[name]")
+					print("RV:", RemoteValues, name, value)
+				end
+				local attempt = 0
+				repeat
+					task.wait(0.1)
+					attempt += 1
+				until RemoteValues[name] ~= nil or attempt > 5
+				if RemoteValues[name] ~= nil then
+					RemoteValues[name].Value = newValue
+					RemoteValues[name].Ready = true
+				end
+            end)
             r:FireServer()--ask server for current value
         end
 		return RemoteValues[name]
@@ -236,6 +250,57 @@ function NeoNet:Fire(name: string, ...: any)
 end--add fire for, except, and other things
 
 --[=[
+    Returns an iterator for use in a loop or ECS context.
+    Arguments are iterated through from oldest to newest.
+    :::caution
+    Breaking the loop MAY drop all arguments gathered at that moment
+    since it clears the storage every time NeoNet:Listen is called.
+
+    Middleware also doesn't work yet.
+    :::
+    ```lua
+    game:GetService("RunService").Heartbeat:Connect(function()
+        for index: number, arg1, arg2 in NeoNet:Listen("DropItem") do
+            --drop the item or whatever
+        end
+    end)
+    ```
+]=]
+function NeoNet:Listen(name: string, middleware: RemoteClientMiddleware?): () -> (number, ...any)
+    if not IsRunning then return function() end end
+
+    --create new unique listener (event name + script name + line number)
+    local file, line = debug.info(2, "sl")
+    local listName = file .. ":" .. tostring(line) .. ":" .. name
+    if Listeners[listName] == nil then --CREATE LISTENER (FIRST FRAME)
+        Listeners[listName] = {
+            Storage = {},
+        }
+        Listeners[listName]._connection = self:Connect(name, function(...)
+            table.insert(Listeners[listName].Storage, {...})
+        end)
+        return function() end
+    end
+
+    --get info on requests & arguments
+    --clear listener's data
+    local storage = Listeners[listName].Storage
+
+    --return iterator
+    local index = 0
+    return function()
+        index += 1
+
+        local value = storage[1]
+        if value then
+            table.remove(storage, 1) --this should remove this iteration + move other data forward
+            return index, unpack(value)
+        end
+        return
+    end
+end
+
+--[=[
     Connects a handler function to the given RemoteEvent and disconnects after the first event.
     :::caution
     If the middleware drops the request it will still be disconnected, use NeoNet:ConnectUntil if you want to only disconnect after middleware passes an event.
@@ -244,7 +309,7 @@ end--add fire for, except, and other things
     NeoNet:ConnectOnce("SomeEvent", function(...) end)
     ```
 ]=]
-function NeoNet:ConnectOnce(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware | RemoteClientMiddleware)
+function NeoNet:ConnectOnce(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware | RemoteClientMiddleware?)
     local connection = nil
     connection = self:Connect(name, function(player, ...)
         connection:Disconnect()
@@ -277,7 +342,7 @@ end
     NeoNet:ConnectUntil("SomeEvent", function(...) end, someMiddleware)
     ```
 ]=]
-function NeoNet:ConnectUntil(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware | RemoteClientMiddleware)
+function NeoNet:ConnectUntil(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware | RemoteClientMiddleware?)
     local connection = nil
     connection = self:Connect(name, function(...)
         connection:Disconnect()
@@ -410,7 +475,7 @@ if IsServer then
         NeoNet:Connect("SomeEvent", function(player, ...) end)
         ```
     ]=]
-    function NeoNet:Connect(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware): RBXScriptConnection
+    function NeoNet:Connect(name: string, handler: (...any) -> nil, middleware: RemoteServerMiddleware?): RBXScriptConnection
         if not IsRunning then return end
         return self:RemoteEvent(name).OnServerEvent:Connect(function(player, ...)
             if middleware then
@@ -433,7 +498,7 @@ if IsServer then
         end)
         ```
     ]=]
-    function NeoNet:Handle(name: string, handler: (player: Player, ...any) -> ...any, middleware: RemoteServerMiddleware)
+    function NeoNet:Handle(name: string, handler: (player: Player, ...any) -> ...any, middleware: RemoteServerMiddleware?)
         if not IsRunning then return end
         -- self:RemoteFunction(name).OnServerInvoke = handler
         self:RemoteFunction(name).OnServerInvoke = function(player, ...)
@@ -582,20 +647,23 @@ if IsServer then
 
     --[=[
         @server
-        Destroys all RemoteEvents and RemoteFunctions. This
-        should really only be used in testing environments
-        and not during runtime.
+        Destroys all remotes. This should really only be
+        used in testing environments and not during runtime.
     ]=]
     function NeoNet:Clean()
         NeoNet.Parent:ClearAllChildren()
+        for _, RV in table.move(RemoteValues, 1, #RemoteValues, #Listeners + 1, Listeners) do
+            RV._connection:Disconnect()
+        end
         table.clear(RemoteValues)
+        table.clear(Listeners)
     end
 else
     --[[
         CLIENT ONLY METHODS
     ]]
     --moonwave documentation is on the server version of this method
-    function NeoNet:Connect(name: string, handler: (...any) -> nil, middleware: RemoteClientMiddleware): RBXScriptConnection
+    function NeoNet:Connect(name: string, handler: (...any) -> nil, middleware: RemoteClientMiddleware?): RBXScriptConnection
         if not IsRunning then return end
         return self:RemoteEvent(name).OnClientEvent:Connect(function(...)
             if middleware then
@@ -618,21 +686,13 @@ else
         end)
         ```
     ]=]
-    function NeoNet:Observe(name: string, handler: (any), middleware: RemoteClientMiddleware)
+    function NeoNet:Observe(name: string, handler: (any), middleware: RemoteClientMiddleware?)
         if not IsRunning then return end
         local r = self:RemoteValue(name)
 
-        --initial value
-        if middleware then
-            local result, params = middleware({r})
-            if result then
-                handler(if params then table.unpack(params) else r)
-            end
-        else
-            handler(r)
-        end
+        --initial value is handled by :RemoteValue
 
-        return r.Event.OnClientEvent:Connect(function(...)
+        local con = r.Event.OnClientEvent:Connect(function(...)
             if middleware then
                 local result, params = middleware({...})
                 if result then
@@ -642,6 +702,8 @@ else
                 handler(...)
             end
         end)
+
+        return con
     end
 
     --[=[
