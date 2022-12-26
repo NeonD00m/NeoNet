@@ -329,7 +329,7 @@ function NeoNet:ConnectOnce(name: string, handler: (...any) -> nil, middleware: 
                     handler(player, if params then table.unpack(params) else ...)
                 end
             else
-                handler(...)
+                handler(player, ...)
             end
         end
     end)
@@ -484,7 +484,7 @@ if IsServer then
                     handler(player, if params then table.unpack(params) else ...)
                 end
             else
-                handler(...)
+                handler(player, ...)
             end
         end)
     end
